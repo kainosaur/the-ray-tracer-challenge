@@ -2,7 +2,7 @@ pub mod features;
 
 #[cfg(test)]
 mod tests {
-    use crate::features::{compare_equal, tuple::{Point, TFTuple, Tuple, Vector}};
+    use crate::features::{compare_equal, tuple::{Point, TFTuple, Tuple, Vector}, operators::{Magnitude, Normalize, Dot}};
     use std::ops::{Add, Sub, Mul, Div};
 
     // Note this useful idiom: importing names from outer (for mod tests) scope.
@@ -95,5 +95,46 @@ mod tests {
     fn div_scalar_tuple() {
         let a = Tuple::new(1., -2., 3., -4.);
         assert!(a.div(2.).eq(&Tuple::new(0.5, -1., 1.5, -2.)));
+    }
+    #[test]
+    fn magnitude_unit_vector() {
+        let v1 = Vector::new(1., 0., 0.);
+        let v2 = Vector::new(0., 1., 0.);
+        let v3 = Vector::new(0., 0., 1.);
+        assert!(compare_equal(v1.magnitude(), 1.));
+        assert!(compare_equal(v2.magnitude(), 1.));
+        assert!(compare_equal(v3.magnitude(), 1.));
+    }
+    #[test]
+    fn magnitude_of_vectors() {
+        let v1 = Vector::new(1., 2., 3.);
+        let v2 = Vector::new(-1., -2., -3.);
+        assert!(compare_equal(v1.magnitude(), (14_f32).sqrt()));
+        assert!(compare_equal(v2.magnitude(), (14_f32).sqrt()));
+        assert!(compare_equal(v1.magnitude(), v2.magnitude()));
+    }
+    #[test]
+    fn normalize_vector_basic() {
+        let v = Vector::new(4., 0., 0.);
+        assert!(v.normalize().eq(&Vector::new(1., 0., 0.)));
+    }
+    #[test]
+    fn normalize_vector_and_check_if_unit() {
+        let v = Vector::new(1., 2., 3.);
+        assert!(v.normalize().eq(&Vector::new(1./(14_f32).sqrt(), 2./(14_f32).sqrt(), 3./(14_f32).sqrt())));
+        assert!(compare_equal(v.normalize().magnitude(), 1.));
+    }
+    #[test]
+    fn dot_vectors() {
+        let a = Vector::new(1., 2., 3.);
+        let b = Vector::new(2., 3., 4.);
+        assert!(compare_equal(a.dot(&b), 20.));
+    }
+    #[test]
+    fn cross_product_vectors() {
+        let a = Vector::new(1., 2., 3.);
+        let b = Vector::new(2., 3., 4.);
+        assert!(a.cross(&b).eq(&Vector::new(-1., 2., -1.)));
+        assert!(b.cross(&a).eq(&Vector::new(1., -2., 1.)));
     }
 }

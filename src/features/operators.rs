@@ -1,9 +1,17 @@
-use std::ops::{Add, Mul, Sub, Div};
+use std::ops::{Add, Div, Mul, Sub};
 
 use crate::features::tuple::{Point, Tuple, Vector};
 
-trait Magnitude {
+pub trait Magnitude {
     fn magnitude(&self) -> f32;
+}
+
+pub trait Normalize {
+    fn normalize(&self) -> Self;
+}
+
+pub trait Dot {
+    fn dot(&self, other: &Self) -> f32;
 }
 
 impl Add for Tuple<f32> {
@@ -54,6 +62,57 @@ impl Div<f32> for Tuple<f32> {
             self.y() / rhs,
             self.z() / rhs,
             self.w() / rhs
+        )
+    }
+}
+
+impl Magnitude for Tuple<f32> {
+    fn magnitude(&self) -> f32 {
+        (self.x().powf(2.) + self.y().powf(2.) + self.z().powf(2.) + self.w().powf(2.)).sqrt()
+    }
+}
+
+impl Normalize for Tuple<f32> {
+    fn normalize(&self) -> Self {
+        let m = self.magnitude();
+            Tuple::new(
+                self.x()/m,
+                self.y()/m,
+                self.z()/m,
+                self.z()/m
+            )
+    }
+}
+
+impl Magnitude for Vector<f32> {
+    fn magnitude(&self) -> f32 {
+        (self.x().powf(2.) + self.y().powf(2.) + self.z().powf(2.)).sqrt()
+    }
+}
+
+impl Normalize for Vector<f32> {
+    fn normalize(&self) -> Self {
+        let m = self.magnitude();
+        Vector::new(
+            self.x()/m,
+            self.y()/m,
+            self.z()/m
+        )
+    }
+}
+
+impl Dot for Vector<f32> {
+    fn dot(&self, other: &Self) -> f32 {
+        self.x() * other.x() + self.y() * other.y() + self.z() * other.z()
+    }
+}
+
+impl Vector<f32> {
+    pub fn cross(&self, other: &Self) -> Self {
+        Vector::new(
+            self.y() * other.z() - self.z() * other.y(),
+            self.z() * other.x() - self.x() * other.z(),
+            self.x() * other.y() - self.y() * other.x()
         )
     }
 }

@@ -1,5 +1,6 @@
 use crate::features::compare_equal;
 
+#[derive(Clone, Copy, Debug)]
 pub struct Tuple<T> {
     x: T,
     y: T,
@@ -7,12 +8,14 @@ pub struct Tuple<T> {
     w: T
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct Point<T> {
     x: T,
     y: T, 
     z: T
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct Vector<T> {
     x: T,
     y: T,
