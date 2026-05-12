@@ -30,7 +30,7 @@ impl<T> Tuple<T> {
 }
 
 impl Tuple<f32> {
-    pub fn iter(&self) -> Iter<'_> {
+    fn iter(&self) -> Iter<'_> {
         Iter {
             inner: self,
             index: 0,

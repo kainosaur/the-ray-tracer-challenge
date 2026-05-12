@@ -5,9 +5,6 @@ mod tests {
     use crate::features::{compare_equal, tuple::{Point, TFTuple, Tuple, Vector}, operators::{Magnitude, Normalize, Dot}};
     use std::ops::{Add, Sub, Mul, Div};
 
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
-    use super::*;
-
     #[test]
     fn is_point_test() {
         let a = Tuple::new(4.3, -4.2, 3.1, 1.0);

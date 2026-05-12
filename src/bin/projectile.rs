@@ -1,9 +1,7 @@
 use std::ops::Add;
 
-use crate::features::tuple::{Point, Vector};
-use crate::features::operators::Normalize;
-
-pub mod features;
+use ray_tracer::features::tuple::{Point, Vector};
+use ray_tracer::features::operators::Normalize;
 
 #[derive(Clone, Copy, Debug)]
 struct Projectile {
