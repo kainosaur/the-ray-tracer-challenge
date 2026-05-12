@@ -3,7 +3,7 @@ pub mod features;
 #[cfg(test)]
 mod tests {
     use crate::features::{compare_equal, tuple::{Point, TFTuple, Tuple, Vector}};
-    use std::ops::{Add, Sub};
+    use std::ops::{Add, Sub, Mul, Div};
 
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
@@ -53,15 +53,47 @@ mod tests {
         assert!(a.add(b).eq(&Tuple::new(1., 1., 6., 1.)));
     }
     #[test]
+    fn sub_points() {
+        let p1 = Point::new(3., 2., 1.);
+        let p2 = Point::new(5., 6., 7.);
+        assert!(p1.sub(p2).eq(&Vector::new(-2.,-4.,-6.)));
+    }
+    #[test]
     fn sub_vector_from_point() {
         let p = Point::new(3., 2., 1.,);
         let v = Vector::new(5., 6., 7.,);
-        assert!(p.as_tuple().sub(v.as_tuple()).eq(&Point::new(-2., -4., -6.).as_tuple()))
+        assert!(p.sub(v).eq(&Point::new(-2., -4., -6.)));
     }
     #[test]
-    fn sub_points() {
-        let p1 = Point::new(3., 2., 1.);
-        let p2 = Point::new(-2., -4., -6.);
-        assert!(p1.as_tuple().sub(p2.as_tuple()).eq(&Vector::new(-2.,-4.,-6.).as_tuple()));
+    fn sub_vectors() {
+        let v1 = Vector::new(3., 2., 1.);
+        let v2 = Vector::new(5., 6., 7.);
+        assert!(v1.sub(v2).eq(&Vector::new(-2., -4., -6.)));
+    }
+    #[test]
+    fn sub_from_zero_vector() {
+        let zero_vector = Vector::new(0.,0.,0.);
+        let v = Vector::new(1.,-2., 3.);
+        assert!(zero_vector.sub(v).eq(&Vector::new(-1., 2., -3.)));
+    }
+    #[test]
+    fn negate_tuple() {
+        let t = Tuple::new(1., -2., 3., -4.);
+        assert!(t.negate().eq(&Tuple::new(-1., 2., -3., 4.)));
+    }
+    #[test]
+    fn mul_scalar_tuple() {
+        let a = Tuple::new(1., -2., 3., -4.);
+        assert!(a.mul(3.5).eq(&Tuple::new(3.5, -7., 10.5, -14.)));
+    }
+    #[test]
+    fn frac_mul_scalar_tuple() {
+        let a = Tuple::new(1., -2., 3., -4.);
+        assert!(a.mul(0.5).eq(&Tuple::new(0.5, -1., 1.5, -2.)));
+    }
+    #[test]
+    fn div_scalar_tuple() {
+        let a = Tuple::new(1., -2., 3., -4.);
+        assert!(a.div(2.).eq(&Tuple::new(0.5, -1., 1.5, -2.)));
     }
 }

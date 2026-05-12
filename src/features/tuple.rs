@@ -57,11 +57,56 @@ impl Tuple<f32> {
     pub fn w(&self) -> f32 {
         self.w
     }
+
+    pub fn negate(&self) -> Self {
+        Tuple::new(
+            -self.x,
+            -self.y,
+            -self.z,
+            -self.w
+        )
+    }
 }
 
 impl<T> Point<T> {
     pub fn new(x: T, y: T, z: T) -> Self {
         Self {x, y, z}
+    }
+}
+
+impl Point<f32> {
+    pub fn x(&self) -> f32 {
+        self.x
+    }
+
+    pub fn y(&self) -> f32 {
+        self.y
+    }
+
+    pub fn z(&self) -> f32 {
+        self.z
+    }
+}
+
+impl Vector<f32> {
+    pub fn x(&self) -> f32 {
+        self.x
+    }
+
+    pub fn y(&self) -> f32 {
+        self.y
+    }
+
+    pub fn z(&self) -> f32 {
+        self.z
+    }
+    
+    pub fn negate(&self) -> Self {
+        Vector::new(
+            -self.x,
+            -self.y,
+            -self.z,
+        )
     }
 }
 
@@ -113,6 +158,22 @@ impl PartialEq for Tuple<f32> {
     fn eq(&self, other: &Self) -> bool {
         self.iter()
             .zip(other.iter())
+            .all(|(left, right)| compare_equal(*left, *right))
+    }
+}
+
+impl PartialEq for Vector<f32> {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_tuple().iter()
+            .zip(other.as_tuple().iter())
+            .all(|(left, right)| compare_equal(*left, *right))
+    }
+}
+
+impl PartialEq for Point<f32> {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_tuple().iter()
+            .zip(other.as_tuple().iter())
             .all(|(left, right)| compare_equal(*left, *right))
     }
 }
