@@ -1,5 +1,3 @@
-use std::path::absolute;
-
 use crate::features::compare_equal;
 
 pub struct Tuple<T> {
@@ -9,36 +7,112 @@ pub struct Tuple<T> {
     w: T
 }
 
+pub struct Point<T> {
+    x: T,
+    y: T, 
+    z: T
+}
+
+pub struct Vector<T> {
+    x: T,
+    y: T,
+    z: T
+}
+
 impl<T> Tuple<T> {
     pub fn new(x: T, y: T, z: T, w: T) -> Self {
         Self {x, y, z, w}
     }
-
-    pub fn x(&self) -> &T {
-        &self.x
-    }
-
-    pub fn y(&self) -> &T {
-        &self.y
-    }
-
-    pub fn z(&self) -> &T {
-        &self.z
-    }
-
-    pub fn w(&self) -> &T {
-        &self.w
-    }
-
     
 }
 
 impl Tuple<f32> {
+    pub fn iter(&self) -> Iter<'_> {
+        Iter {
+            inner: self,
+            index: 0,
+        }
+    }
+
     pub fn is_point(&self) -> bool {
-        compare_equal(*self.w(), 1.0)
+        compare_equal(self.w(), 1.0)
     }
     
     pub fn is_vector(&self) -> bool {
-        compare_equal(*self.w(), 0.)
+        compare_equal(self.w(), 0.)
+    }
+
+    pub fn x(&self) -> f32 {
+        self.x
+    }
+
+    pub fn y(&self) -> f32 {
+        self.y
+    }
+
+    pub fn z(&self) -> f32 {
+        self.z
+    }
+
+    pub fn w(&self) -> f32 {
+        self.w
+    }
+}
+
+impl<T> Point<T> {
+    pub fn new(x: T, y: T, z: T) -> Self {
+        Self {x, y, z}
+    }
+}
+
+pub trait TFTuple {
+    fn as_tuple(&self) -> Tuple<f32>;
+}
+
+impl TFTuple for Point<f32> {
+    fn as_tuple(&self) -> Tuple<f32> {
+        return Tuple::new(self.x, self.y, self.z, 1.0)
+    }
+}
+
+impl TFTuple for Vector<f32> {
+    fn as_tuple(&self) -> Tuple<f32> {
+        return Tuple::new(self.x, self.y, self.z, 0.0)
+    }
+}
+
+impl<T> Vector<T> {
+    pub fn new(x: T, y: T, z: T) -> Self {
+        Self {x, y, z}
+    }
+}
+
+struct Iter<'a> {
+    inner: &'a Tuple<f32>,
+    index: u8,
+}
+
+impl<'a> Iterator for Iter<'a> {
+    type Item = &'a f32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let ret = match self.index {
+            0 => &self.inner.x,
+            1 => &self.inner.y,
+            2 => &self.inner.z,
+            3 => &self.inner.w,
+            _ => return None,
+        };
+
+        self.index += 1;
+        Some(ret)
+    }
+}
+
+impl PartialEq for Tuple<f32> {
+    fn eq(&self, other: &Self) -> bool {
+        self.iter()
+            .zip(other.iter())
+            .all(|(left, right)| compare_equal(*left, *right))
     }
 }
