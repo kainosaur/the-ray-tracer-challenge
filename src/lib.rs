@@ -197,4 +197,10 @@ mod tests {
             ("P3\n5 3\n255\n255 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 128 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0 0 0 0 0 255");
         assert_eq!(ppm_string, compared_ppm_string);
     }
+    #[test]
+    fn pixel_formatting() {
+        let mut canvas = Canvas::new(10,2);
+        let color = Color::new(1., 0.8, 0.6);
+        canvas.overwrite_all_pixels(color);
+    }
 }

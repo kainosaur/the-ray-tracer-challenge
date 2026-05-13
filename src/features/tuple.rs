@@ -157,17 +157,16 @@ impl<T> Color<T> {
 }
 
 impl Color<f32> {
+    pub fn ppm_components(&self) -> [String; 3] {
+        [
+            (self.red.clamp(0., 1.).mul(255.).round() as i32).to_string(),
+            (self.green.clamp(0., 1.).mul(255.).round() as i32).to_string(),
+            (self.blue.clamp(0., 1.).mul(255.).round() as i32).to_string(),
+        ]
+    }
+
     pub fn tuple_string(&self) -> String {
-        let mut s = String::new();
-        let str_red = (self.red.clamp(0., 1.).mul(255.).round() as i32).to_string();
-        let str_green = (self.green.clamp(0., 1.).mul(255.).round() as i32).to_string();
-        let str_blue = (self.blue.clamp(0., 1.).mul(255.).round() as i32).to_string();
-        s.push_str(&str_red);
-        s.push_str(" ");
-        s.push_str(&str_green);
-        s.push_str(" ");
-        s.push_str(&str_blue);
-        s
+        self.ppm_components().join(" ")
     }
 }
 

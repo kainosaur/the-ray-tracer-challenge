@@ -206,6 +206,20 @@ impl Sub for Color<f32> {
     }
 }
 
+impl Mul<f32> for Vector<f32> {
+    type Output = Vector<f32>;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Vector::new(
+            self.x() * rhs,
+            self.y() * rhs,
+            self.z() * rhs
+        )
+    }
+}
+    
+    
+
 impl Mul<f32> for Color<f32> {
     type Output = Color<f32>;
 

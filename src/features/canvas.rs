@@ -25,6 +25,12 @@ impl Canvas {
         self.pixels[index] = color;
     }
 
+    pub fn overwrite_all_pixels(&mut self, color: Color<f32>) {
+        for i in 0..(self.width * self.height) {
+            self.pixels[i] = color;
+        }
+    }
+
     pub fn pixel_at(&self, x: usize, y: usize) -> Color<f32> {
         self.pixels[self.index(x, y)]
     }
@@ -41,17 +47,29 @@ impl Canvas {
         s.push_str("\n255\n");
         // Color data
         for i in 0..self.height {
+            let mut line_len = 0;
             for j in 0..self.width {
-                s.push_str(&self.pixels[self.index(j, i)].tuple_string());
-                if j == self.width - 1 {
-                    break;
+                for component in self.pixels[self.index(j, i)].ppm_components() {
+                    let component_len = component.len();
+
+                    if line_len == 0 {
+                        s.push_str(&component);
+                        line_len = component_len;
+                    } else if line_len + 1 + component_len > 70 {
+                        s.push_str("\n");
+                        s.push_str(&component);
+                        line_len = component_len;
+                    } else {
+                        s.push_str(" ");
+                        s.push_str(&component);
+                        line_len += 1 + component_len;
+                    }
                 }
-                s.push_str(" ");
             }
-            if i == self.height - 1 {
-                break;
+
+            if i < self.height - 1 {
+                s.push_str("\n");
             }
-            s.push_str("\n");
         }
         s
     }
