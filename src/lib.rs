@@ -2,7 +2,7 @@ pub mod features;
 
 #[cfg(test)]
 mod tests {
-    use crate::features::{compare_equal, tuple::{Point, TFTuple, Tuple, Vector}, operators::{Magnitude, Normalize, Dot}};
+    use crate::features::{canvas::Canvas, compare_equal, operators::{Dot, Magnitude, Normalize}, tuple::{Color, Point, TFTuple, Tuple, Vector}};
     use std::ops::{Add, Sub, Mul, Div};
 
     #[test]
@@ -133,5 +133,68 @@ mod tests {
         let b = Vector::new(2., 3., 4.);
         assert!(a.cross(&b).eq(&Vector::new(-1., 2., -1.)));
         assert!(b.cross(&a).eq(&Vector::new(1., -2., 1.)));
+    }
+    #[test]
+    fn color_tuple() {
+        let c = Color::new(-0.5, 0.4, 1.7);
+        assert!(compare_equal(c.red, -0.5));
+        assert!(compare_equal(c.green, 0.4));
+        assert!(compare_equal(c.blue, 1.7));
+    }
+    #[test]
+    fn add_colors() {
+        let c1 = Color::new(0.9, 0.6, 0.75);
+        let c2 = Color::new(0.7, 0.1, 0.25);
+        assert!(c1.add(c2).eq(&Color::new(1.6, 0.7, 1.0)));
+    }
+    #[test]
+    fn sub_colors() {
+        let c1 = Color::new(0.9, 0.6, 0.75);
+        let c2 = Color::new(0.7, 0.1, 0.25);
+        assert!(c1.sub(c2).eq(&Color::new(0.2, 0.5, 0.5))) ;
+    }
+    #[test]
+    fn mul_scalar_color() {
+        let c = Color::new(0.2, 0.3, 0.4);
+        assert!(c.mul(2.).eq(&Color::new(0.4, 0.6, 0.8)));
+    }
+    #[test]
+    fn mul_colors_op() {
+        let c1 = Color::new(1., 0.2, 0.4);
+        let c2 = Color::new(0.9, 1., 0.1);
+        assert!(c1.mul(c2).eq(&Color::new(0.9, 0.2, 0.04)));
+    }
+    #[test]
+    fn all_pixels_black() {
+        let x = 10;
+        let y = 20;
+        let canvas = Canvas::new(x,y);
+        for i in 0..x {
+            for j in 0..y {
+                assert!(canvas.pixel_at(i, j).eq(&Color::new(0.,0.,0.)));
+            }
+        }
+    }
+    #[test]
+    fn write_pixel_test() {
+        let mut canvas = Canvas::new(10, 20);
+        let red = Color::new(1., 0., 0.);
+        canvas.write_pixel(2, 3, red);
+        assert!(canvas.pixel_at(2, 3).eq(&red));
+        assert!(canvas.pixel_at(2, 4).eq(&Color::new(0.,0.,0.)));
+    }
+    #[test]
+    fn write_file_string() {
+        let mut c = Canvas::new(5,3);
+        let c1 = Color::new(1.5, 0., 0.);
+        let c2 = Color::new(0., 0.5, 0.);
+        let c3 = Color::new(-0.5, 0., 1.);
+        c.write_pixel(0, 0, c1);
+        c.write_pixel(2, 1, c2);
+        c.write_pixel(4, 2, c3);
+        let ppm_string = c.create_file_string();
+        let compared_ppm_string = String::from
+            ("P3\n5 3\n255\n255 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 128 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0 0 0 0 0 255");
+        assert_eq!(ppm_string, compared_ppm_string);
     }
 }

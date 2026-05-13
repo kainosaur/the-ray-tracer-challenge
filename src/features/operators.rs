@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use crate::features::tuple::{Point, Tuple, Vector};
+use crate::features::tuple::{Color, Point, Tuple, Vector};
 
 pub trait Magnitude {
     fn magnitude(&self) -> f32;
@@ -178,6 +178,54 @@ impl Sub for Vector<f32> {
             self.x() - other.x(),
             self.y() - other.y(),
             self.z() - other.z(),
+        )
+    }
+}
+
+impl Add for Color<f32> {
+    type Output = Color<f32>;
+
+    fn add(self, other: Self) -> Self::Output {
+        Color::new(
+            self.red + other.red,
+            self.green + other.green,
+            self.blue + other.blue
+        )
+    }
+}
+
+impl Sub for Color<f32> {
+    type Output = Color<f32>;
+
+    fn sub(self, other: Self) -> Self::Output {
+        Color::new(
+            self.red - other.red,
+            self.green - other.green,
+            self.blue - other.blue
+        )
+    }
+}
+
+impl Mul<f32> for Color<f32> {
+    type Output = Color<f32>;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Color::new(
+            self.red * rhs,
+            self.green * rhs,
+            self.blue * rhs
+        )
+    }
+}
+
+impl Mul for Color<f32> {
+    type Output = Color<f32>;
+
+    fn mul(self, other: Self) -> Self::Output {
+        Color::new(
+            self.red * other.red,
+            self.green * other.green,
+            self.blue * other.blue
         )
     }
 }

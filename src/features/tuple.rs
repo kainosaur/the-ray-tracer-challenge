@@ -1,4 +1,13 @@
+use std::ops::Mul;
+
 use crate::features::compare_equal;
+
+#[derive(Clone, Copy, Debug)]
+pub struct Color<T> {
+    pub red: T,
+    pub green: T,
+    pub blue: T,
+}
 
 #[derive(Clone, Copy, Debug)]
 pub struct Tuple<T> {
@@ -129,9 +138,36 @@ impl TFTuple for Vector<f32> {
     }
 }
 
+impl TFTuple for Color<f32> {
+    fn as_tuple(&self) -> Tuple<f32> {
+        return Tuple::new(self.red, self.green, self.blue, 0.0)
+    }
+}
+
 impl<T> Vector<T> {
     pub fn new(x: T, y: T, z: T) -> Self {
         Self {x, y, z}
+    }
+}
+
+impl<T> Color<T> {
+    pub fn new(red: T, green: T, blue: T) -> Self {
+        Self {red, green, blue}
+    }
+}
+
+impl Color<f32> {
+    pub fn tuple_string(&self) -> String {
+        let mut s = String::new();
+        let str_red = (self.red.clamp(0., 1.).mul(255.).round() as i32).to_string();
+        let str_green = (self.green.clamp(0., 1.).mul(255.).round() as i32).to_string();
+        let str_blue = (self.blue.clamp(0., 1.).mul(255.).round() as i32).to_string();
+        s.push_str(&str_red);
+        s.push_str(" ");
+        s.push_str(&str_green);
+        s.push_str(" ");
+        s.push_str(&str_blue);
+        s
     }
 }
 
@@ -174,6 +210,14 @@ impl PartialEq for Vector<f32> {
 }
 
 impl PartialEq for Point<f32> {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_tuple().iter()
+            .zip(other.as_tuple().iter())
+            .all(|(left, right)| compare_equal(*left, *right))
+    }
+}
+
+impl PartialEq for Color<f32> {
     fn eq(&self, other: &Self) -> bool {
         self.as_tuple().iter()
             .zip(other.as_tuple().iter())
