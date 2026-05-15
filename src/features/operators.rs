@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use crate::features::tuple::{Color, Point, Tuple, Vector};
+use crate::features::{matrices::Matrix4x4, tuple::{Color, Point, Tuple, Vector}};
 
 pub trait Magnitude {
     fn magnitude(&self) -> f32;
@@ -241,5 +241,46 @@ impl Mul for Color<f32> {
             self.green * other.green,
             self.blue * other.blue
         )
+    }
+}
+
+impl Mul<Matrix4x4<f32>> for Matrix4x4<f32> {
+    type Output = Matrix4x4<f32>;
+
+    fn mul(self, other: Self) -> Self::Output {
+        let mut m = Matrix4x4 ([0., 0., 0., 0.], [0., 0., 0., 0.], [0., 0., 0., 0.], [0., 0., 0., 0.]);
+        // Row i self dot Col j other = new at i,j
+        for row in 0..4 {
+            for col in 0..4 {
+                m.assign(
+                    row, 
+                    col, 
+                    self.at(row, 0) * other.at(0, col) + 
+                    self.at(row, 1) * other.at(1, col) +
+                    self.at(row, 2) * other.at(2, col) +
+                    self.at(row, 3) * other.at(3, col)
+                );
+            }
+        }
+        m
+    }
+}
+
+impl Mul<Matrix4x4<f32>> for Tuple<f32> {
+    type Output = Tuple<f32>;
+    
+    fn mul(self, matrix: Matrix4x4<f32>) -> Self::Output {
+        let mut t = Tuple::new(0., 0., 0., 0.);
+        for row in 0..4 {
+            t.assign
+            (
+                row, 
+                matrix.at(row, 0) * self.at(0) +
+                matrix.at(row, 1) * self.at(1) +
+                matrix.at(row, 2) * self.at(2) +
+                matrix.at(row, 3) * self.at(3)
+            );
+        }
+        t
     }
 }

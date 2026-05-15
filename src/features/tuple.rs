@@ -11,10 +11,10 @@ pub struct Color<T> {
 
 #[derive(Clone, Copy, Debug)]
 pub struct Tuple<T> {
-    x: T,
-    y: T,
-    z: T,
-    w: T
+    pub x: T,
+    pub y: T,
+    pub z: T,
+    pub w: T
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -68,6 +68,26 @@ impl Tuple<f32> {
 
     pub fn w(&self) -> f32 {
         self.w
+    }
+        pub fn at(&self, row: usize) -> f32 {
+        match row {
+            0 => self.x,
+            1 => self.y,
+            2 => self.z,
+            3 => self.w,
+            _=> panic!("Row out of bounds.")
+        }
+    }
+
+    pub fn assign(&mut self, row: usize, n: f32) -> Self {
+        match row {
+            0 => self.x = n,
+            1 => self.y = n,
+            2 => self.z = n,
+            3 => self.w = n,
+            _=> panic!("Row out of bounds.")
+        }
+        *self
     }
 
     pub fn negate(&self) -> Self {

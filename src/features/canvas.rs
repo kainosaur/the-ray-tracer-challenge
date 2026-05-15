@@ -21,6 +21,9 @@ impl Canvas {
     }
 
     pub fn write_pixel(&mut self, x: usize, y: usize, color: Color<f32>) {
+        if x > self.width {
+            panic!("width out of bounds.");
+        }
         let index = self.index(x, y);
         self.pixels[index] = color;
     }
