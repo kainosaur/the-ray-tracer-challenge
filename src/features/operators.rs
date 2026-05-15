@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use crate::features::{matrices::Matrix4x4, tuple::{Color, Point, Tuple, Vector}};
+use crate::features::{matrices::Matrix4x4, tuple::{Color, Point, TFTuple, Tuple, Vector}};
 
 pub trait Magnitude {
     fn magnitude(&self) -> f32;
@@ -187,9 +187,9 @@ impl Add for Color<f32> {
 
     fn add(self, other: Self) -> Self::Output {
         Color::new(
-            self.red + other.red,
-            self.green + other.green,
-            self.blue + other.blue
+            self.red() + other.red(),
+            self.green() + other.green(),
+            self.blue() + other.blue()
         )
     }
 }
@@ -199,9 +199,9 @@ impl Sub for Color<f32> {
 
     fn sub(self, other: Self) -> Self::Output {
         Color::new(
-            self.red - other.red,
-            self.green - other.green,
-            self.blue - other.blue
+            self.red() - other.red(),
+            self.green() - other.green(),
+            self.blue() - other.blue()
         )
     }
 }
@@ -225,9 +225,9 @@ impl Mul<f32> for Color<f32> {
 
     fn mul(self, rhs: f32) -> Self::Output {
         Color::new(
-            self.red * rhs,
-            self.green * rhs,
-            self.blue * rhs
+            self.red() * rhs,
+            self.green() * rhs,
+            self.blue() * rhs
         )
     }
 }
@@ -237,9 +237,9 @@ impl Mul for Color<f32> {
 
     fn mul(self, other: Self) -> Self::Output {
         Color::new(
-            self.red * other.red,
-            self.green * other.green,
-            self.blue * other.blue
+            self.red() * other.red(),
+            self.green() * other.green(),
+            self.blue() * other.blue()
         )
     }
 }
@@ -266,21 +266,37 @@ impl Mul<Matrix4x4<f32>> for Matrix4x4<f32> {
     }
 }
 
-impl Mul<Matrix4x4<f32>> for Tuple<f32> {
+impl Mul<Tuple<f32>> for Matrix4x4<f32>{
     type Output = Tuple<f32>;
     
-    fn mul(self, matrix: Matrix4x4<f32>) -> Self::Output {
+    fn mul(self, tuple: Tuple<f32>) -> Self::Output {
         let mut t = Tuple::new(0., 0., 0., 0.);
         for row in 0..4 {
             t.assign
             (
                 row, 
-                matrix.at(row, 0) * self.at(0) +
-                matrix.at(row, 1) * self.at(1) +
-                matrix.at(row, 2) * self.at(2) +
-                matrix.at(row, 3) * self.at(3)
+                self.at(row, 0) * tuple.at(0) +
+                self.at(row, 1) * tuple.at(1) +
+                self.at(row, 2) * tuple.at(2) +
+                self.at(row, 3) * tuple.at(3)
             );
         }
         t
+    }
+}
+
+impl Mul<Point<f32>> for Matrix4x4<f32> {
+    type Output = Tuple<f32>;
+
+    fn mul(self, point: Point<f32>) -> Self::Output {
+        self * point.as_tuple()
+    }
+}
+
+impl Mul<Vector<f32>> for Matrix4x4<f32> {
+    type Output = Vector<f32>;
+
+    fn mul(self, vector: Vector<f32>) -> Self::Output {
+        (self * vector.as_tuple()).as_vector()
     }
 }

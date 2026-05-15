@@ -2,8 +2,8 @@ pub mod features;
 
 #[cfg(test)]
 mod tests {
-    use crate::features::{canvas::Canvas, compare_equal, matrices::{Matrix2x2, Matrix3x3, Matrix4x4}, operators::{Dot, Magnitude, Normalize}, tuple::{Color, Point, TFTuple, Tuple, Vector}};
-    use std::ops::{Add, Div, Mul, Sub};
+    use crate::features::{canvas::Canvas, compare_equal, matrices::{Axis, Matrix2x2, Matrix3x3, Matrix4x4}, operators::{Dot, Magnitude, Normalize}, tuple::{Color, Point, TFTuple, Tuple, Vector}};
+    use std::{f32::consts::PI, ops::{Add, Div, Mul, Sub}};
 
     #[test]
     fn is_point_test() {
@@ -137,9 +137,9 @@ mod tests {
     #[test]
     fn color_tuple() {
         let c = Color::new(-0.5, 0.4, 1.7);
-        assert!(compare_equal(c.red, -0.5));
-        assert!(compare_equal(c.green, 0.4));
-        assert!(compare_equal(c.blue, 1.7));
+        assert!(compare_equal(c.red(), -0.5));
+        assert!(compare_equal(c.green(), 0.4));
+        assert!(compare_equal(c.blue(), 1.7));
     }
     #[test]
     fn add_colors() {
@@ -162,7 +162,7 @@ mod tests {
     fn mul_colors_op() {
         let c1 = Color::new(1., 0.2, 0.4);
         let c2 = Color::new(0.9, 1., 0.1);
-        assert!(c1.mul(c2).eq(&Color::new(0.9, 0.2, 0.04)));
+        assert_eq!(c1.mul(c2),Color::new(0.9, 0.2, 0.04));
     }
     #[test]
     fn all_pixels_black() {
@@ -180,8 +180,8 @@ mod tests {
         let mut canvas = Canvas::new(10, 20);
         let red = Color::new(1., 0., 0.);
         canvas.write_pixel(2, 3, red);
-        assert!(canvas.pixel_at(2, 3).eq(&red));
-        assert!(canvas.pixel_at(2, 4).eq(&Color::new(0.,0.,0.)));
+        assert_eq!(canvas.pixel_at(2, 3), red);
+        assert_eq!(canvas.pixel_at(2, 4), Color::new(0.,0.,0.));
     }
     #[test]
     fn write_file_string() {
@@ -260,7 +260,7 @@ mod tests {
         let m = Matrix4x4([1., 2., 3., 4.], [2., 4., 4., 2.], [8., 6., 4., 1.], [0., 0., 0., 1.]);
         let t: Tuple<f32> = Tuple::new(1., 2., 3., 1.);
         let sol: Tuple<f32> = Tuple::new(18., 24., 33., 1.);
-        assert_eq!(t* m, sol);
+        assert_eq!(m * t, sol);
     }
     #[test]
     fn identity_matrix() {
@@ -430,5 +430,127 @@ mod tests {
         );
 
         assert_eq!(a.inverse(), inverse);
+    }
+    #[test]
+    fn mul_translation_point() {
+        let transform = Matrix4x4::translation(5., -3., 2.);
+        let p: Point<f32> = Point::new(-3., 4., 5.);
+        assert_eq!((transform * p).as_point(), Point::new(2., 1., 7.))
+    }
+    #[test]
+    fn mul_inverse_translation() {
+        let transform = Matrix4x4::translation(5., -3., 2.);
+        let inverse = transform.inverse();
+        let p = Point::new(-3., 4., 5.);
+        assert_eq!((inverse * p).as_point(), Point::new(-8., 7., 3.));
+    }
+    #[test]
+    fn mul_translation_vector() {
+        let transform = Matrix4x4::translation(5., -3., 2.);
+        let v = Vector::new(-3., 4., 5.);
+        assert_eq!(transform * v, v);
+    }
+    #[test]
+    fn scaling_point() {
+        let transform = Matrix4x4::scaling(2., 3., 4.);
+        let p = Point::new(-4., 6., 8.);
+        assert_eq!((transform * p).as_point(), Point::new(-8., 18., 32.));
+    }
+    #[test]
+    fn scaling_vector() {
+        let transform = Matrix4x4::scaling(2., 3., 4.);
+        let v = Vector::new(-4., 6., 8.);
+        assert_eq!(transform * v, Vector::new(-8., 18., 32.));
+    }
+    #[test]
+    fn inverse_scaling_vector() {
+        let transform = Matrix4x4::scaling(2., 3., 4.);
+        let inv = transform.inverse();
+        let v = Vector::new(-4., 6., 8.);
+        assert_eq!(inv * v, Vector::new(-2., 2., 2.));
+    }
+    #[test]
+    fn reflect_point_x() {
+        let transform = Matrix4x4::scaling(-1., 1., 1.);
+        let p = Point::new(2., 3., 4.);
+        assert_eq!((transform * p).as_point(), Point::new(-2., 3., 4.));
+    }
+    #[test]
+    fn rotation_about_x() {
+        let p = Point::new(0., 1., 0.);
+        let half_quarter = Matrix4x4::rotation(Axis::X, PI / 4.);
+        let full_quarter = Matrix4x4::rotation(Axis::X, PI / 2.);
+        assert_eq!((half_quarter * p).as_point(), Point::new(0., 2_f32.sqrt() / 2., 2_f32.sqrt() / 2.));
+        assert_eq!((full_quarter * p).as_point(), Point::new(0., 0., 1.));
+    }
+    #[test]
+    fn rotation_about_y() {
+        let p = Point::new(0., 0., 1.);
+        let half_quarter = Matrix4x4::rotation(Axis::Y, PI / 4.);
+        let full_quarter = Matrix4x4::rotation(Axis::Y, PI / 2.);
+        assert_eq!((half_quarter * p).as_point(), Point::new(2_f32.sqrt() / 2., 0., 2_f32.sqrt() / 2.));
+        assert_eq!((full_quarter * p).as_point(), Point::new(1., 0., 0.));
+    }
+    #[test]
+    fn rotation_about_z() {
+        let p = Point::new(0., 1., 0.);
+        let half_quarter = Matrix4x4::rotation(Axis::Z, PI / 4.);
+        let full_quarter = Matrix4x4::rotation(Axis::Z, PI / 2.);
+        assert_eq!((half_quarter * p).as_point(), Point::new(-2_f32.sqrt() / 2., 2_f32.sqrt() / 2., 0.));
+        assert_eq!((full_quarter * p).as_point(), Point::new(-1., 0., 0.));
+    }
+    #[test]
+    fn shear_x_proportion_y() {
+        let transform = Matrix4x4::shearing(1., 0., 0., 0., 0., 0.,);
+        let p = Point::new(2.,3., 4.);
+        assert_eq!((transform * p).as_point(), Point::new(5., 3., 4.));
+    }
+    #[test]
+    fn shear_x_proportion_z() {
+        let transform = Matrix4x4::shearing(0., 1., 0., 0., 0., 0.,);
+        let p = Point::new(2.,3., 4.);
+        assert_eq!((transform * p).as_point(), Point::new(6., 3., 4.));
+    }
+    #[test]
+    fn shear_y_proportion_x() {
+        let transform = Matrix4x4::shearing(0., 0., 1., 0., 0., 0.,);
+        let p = Point::new(2.,3., 4.);
+        assert_eq!((transform * p).as_point(), Point::new(2., 5., 4.));
+    }
+    #[test]
+    fn shear_y_proportion_z() {
+        let transform = Matrix4x4::shearing(0., 0., 0., 1., 0., 0.,);
+        let p = Point::new(2.,3., 4.);
+        assert_eq!((transform * p).as_point(), Point::new(2., 7., 4.));
+    }
+    #[test]
+    fn shear_z_proportion_x() {
+        let transform = Matrix4x4::shearing(0., 0., 0., 0., 1., 0.,);
+        let p = Point::new(2.,3., 4.);
+        assert_eq!((transform * p).as_point(), Point::new(2., 3., 6.));
+    }
+    #[test]
+    fn shear_z_proportion_y() {
+        let transform = Matrix4x4::shearing(0., 0., 0., 0., 0., 1.);
+        let p = Point::new(2.,3., 4.);
+        assert_eq!((transform * p).as_point(), Point::new(2., 3., 7.));
+    }
+    #[test]
+    fn sequence_applied() {
+        let p = Point::new(1., 0., 1.);
+        let rotation = Matrix4x4::rotation(Axis::X, PI / 2.);
+        let scale = Matrix4x4::scaling(5., 5., 5.);
+        let translation = Matrix4x4::translation(10., 5., 7.);
+
+        let p2 = (rotation * p).as_point();
+        let p3 = (scale * p2).as_point();
+        let p4 = (translation * p3).as_point();
+        assert_eq!(p2, Point::new(1., -1., 0.));
+        assert_eq!(p3, Point::new(5., -5., 0.));
+        assert_eq!(p4, Point::new(15., 0., 7.));
+
+        let t = translation * scale * rotation;
+
+        assert_eq!((t * p).as_point(), Point::new(15., 0., 7.));
     }
 }

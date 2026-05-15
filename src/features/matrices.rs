@@ -3,6 +3,9 @@ use crate::features::compare_equal;
 #[derive(Clone, Copy, Debug)]
 pub struct Matrix2x2<T>(pub [T; 2], pub [T; 2]);
 
+pub enum Axis {
+    X, Y, Z
+}
 
 #[derive(Clone, Copy, Debug)]
 pub struct Matrix3x3<T>(pub [T; 3], pub [T; 3], pub [T; 3]);
@@ -145,6 +148,60 @@ impl Matrix4x4<f32> {
             [1., 0., 0., 0.],
             [0., 1., 0., 0.],
             [0., 0., 1., 0.],
+            [0., 0., 0., 1.]
+        )
+    }
+
+    pub fn translation(x: f32, y: f32, z: f32) -> Self {
+        Self (
+            [1., 0., 0., x],
+            [0., 1., 0., y],
+            [0., 0., 1., z],
+            [0., 0., 0., 1.,]
+        )
+    }
+
+    pub fn scaling(x: f32, y: f32, z: f32) -> Self {
+        Self(
+            [x, 0., 0., 0.],
+            [0., y, 0., 0.],
+            [0., 0., z, 0.],
+            [0., 0., 0., 1.]
+        )
+    }
+
+    pub fn rotation(axis: Axis, rad: f32) -> Self {
+        match axis {
+            Axis::X => Self
+            (
+                [1., 0., 0., 0.],
+                [0., rad.cos(), -rad.sin(), 0.],
+                [0., rad.sin(), rad.cos(), 0.],
+                [0., 0., 0., 1.]
+            ),
+            Axis::Y => Self
+            (
+                [rad.cos(), 0., rad.sin(), 0.],
+                [0., 1., 0., 0.],
+                [-rad.sin(), 0., rad.cos(), 0.],
+                [0., 0., 0., 1.]
+            ),
+            Axis::Z => Self
+            (
+                [rad.cos(), -rad.sin(), 0., 0.],
+                [rad.sin(), rad.cos(), 0., 0.],
+                [0., 0., 1., 0.],
+                [0., 0., 0., 1.]
+            )
+        }
+    }
+
+    // x_y means "x moved in proportion to y"
+    pub fn shearing(x_y: f32, x_z: f32, y_x: f32, y_z: f32, z_x: f32, z_y: f32) -> Self {
+        Self(
+            [1., x_y, x_z, 0.],
+            [y_x, 1., y_z, 0.],
+            [z_x, z_y, 1., 0.],
             [0., 0., 0., 1.]
         )
     }
