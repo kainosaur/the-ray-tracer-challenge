@@ -1,5 +1,6 @@
 use crate::features::{matrices::Matrix4x4, tuple::{Point, Vector}};
 
+#[derive(Clone, Copy, Debug)]
 pub struct Ray<T> {
     pub origin: Point<T>,
     pub direction: Vector<T>

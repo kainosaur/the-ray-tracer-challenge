@@ -1,6 +1,6 @@
 use std::ops::Mul;
 
-use crate::features::compare_equal;
+use crate::features::{compare_equal, operators::Dot};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Color<T> (pub[T; 3]);
@@ -133,6 +133,10 @@ impl Vector<f32> {
             -self.y(),
             -self.z(),
         )
+    }
+
+    pub fn reflect(&self, normal: Vector<f32>) -> Self {
+        *self - normal * 2. * self.dot(&normal)
     }
 }
 

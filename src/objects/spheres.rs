@@ -1,20 +1,32 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 static NEXT_SPHERE_ID: AtomicUsize = AtomicUsize::new(0);
-use crate::features::{intersections::{Intersection, Intersections}, matrices::Matrix4x4, operators::Dot, rays::Ray, tuple::Point};
+use crate::{features::{intersections::{Intersection, Intersections}, matrices::Matrix4x4, operators::{Dot, Normalize}, rays::Ray, tuple::{Point, Tuple, Vector}}, objects::materials::Material};
 
 use crate::objects::Object::SphereObject;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Sphere {
     pub transform: Matrix4x4<f32>,
+    pub material: Material,
     pub id: usize,
 }
 
+impl Default for Sphere {
+    fn default() -> Self {
+        Self { 
+            transform: Matrix4x4::identity(), 
+            material: Default::default(), 
+            id: NEXT_SPHERE_ID.fetch_add(1, Ordering::Relaxed)
+        }
+    }
+}
+
 impl Sphere {
-    pub fn new() -> Self {
+    pub fn new(transform_matrix: Matrix4x4<f32>, object_material: Material) -> Self {
         Self {
-            transform: Matrix4x4::identity(),
+            transform: transform_matrix,
+            material: object_material,
             id: NEXT_SPHERE_ID.fetch_add(1, Ordering::Relaxed),
         }
     }
@@ -41,6 +53,14 @@ impl Sphere {
                 Intersection::new(t2, SphereObject(self.clone()))
             ])
         }
+    }
+
+    pub fn normal_at(&self, world_point: Point<f32>) -> Vector<f32> {
+        let object_point = self.transform.inverse() * world_point;
+        let object_normal = object_point - Tuple::new(0., 0., 0., 1.);
+        let world_normal = (self.transform.inverse().transpose() * object_normal).assign(3, 0.0);
+
+        world_normal.as_vector().normalize()
     }
 
     pub fn set_transform(&mut self, transform_matrix: Matrix4x4<f32>) -> Matrix4x4<f32> {

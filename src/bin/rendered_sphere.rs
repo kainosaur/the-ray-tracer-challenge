@@ -1,4 +1,4 @@
-use ray_tracer::{features::{canvas::Canvas, operators::Normalize, rays::Ray, tuple::{Color, Point}}, objects::spheres::Sphere};
+use ray_tracer::{features::{canvas::Canvas, operators::Normalize, rays::Ray, tuple::{Color, Point}}, objects::{lights::PointLight, materials::{Material, lighting}, spheres::Sphere}};
 use std::fs::File;
 use std::io::Write;
 
@@ -6,12 +6,21 @@ fn main() -> std::io::Result<()> {
     let ray_origin = Point::new(0., 0., -5.);
     let wall_z = 10.;
     let wall_size = 7.;
+
     let canvas_pixels: f32 = 100.;
     let pixel_size: f32 = wall_size / canvas_pixels;
     let half = wall_size / 2.;
+
     let mut canvas = Canvas::new(canvas_pixels.round() as usize, canvas_pixels.round() as usize);
-    let color = Color::new(1., 0., 0.);
-    let shape = Sphere::new();
+    let mut color ;
+
+    let mut shape = Sphere::default();
+    shape.material = Material::default();
+    shape.material.color = Color::new(1., 0.2, 1.);
+
+    let light_position = Point::new(-10., 10., -10.);
+    let light_color = Color::new(1., 1., 1.);
+    let light = PointLight::new(light_position, light_color);
 
     // For each row of pixels in the canvas
     for y in 0..canvas_pixels.round() as usize {
@@ -31,13 +40,18 @@ fn main() -> std::io::Result<()> {
             let hit = intersect_sphere.hit();
 
             match hit {
-                Some(_) => canvas.write_pixel(x, y, color),
+                Some(intersect) => {
+                let point = ray.position(intersect.t);
+                let normal = intersect.object.get_sphere().unwrap().normal_at(point);
+                let camera = ray.direction.negate();
+                color = lighting(shape.material, light, point, camera, normal);
+                canvas.write_pixel(x, y, color)},
                 None => {}
             }
         }
     }
 
-    let mut file = File::create("Circle_Flat.PPM")?;
+    let mut file = File::create("rendered_sphere.PPM")?;
     file.write_all(canvas.create_file_string().as_bytes())?;
     Ok(())
 }

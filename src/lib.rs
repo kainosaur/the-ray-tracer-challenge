@@ -3,7 +3,7 @@ pub mod objects;
 
 #[cfg(test)]
 mod tests {
-    use crate::{features::{canvas::Canvas, compare_equal, intersections::{Intersection, Intersections}, matrices::{Axis, Matrix2x2, Matrix3x3, Matrix4x4}, operators::{Dot, Magnitude, Normalize}, rays::Ray, tuple::{Color, Point, TFTuple, Tuple, Vector}}, objects::{Object, spheres::Sphere}};
+    use crate::{features::{canvas::Canvas, compare_equal, intersections::{Intersection, Intersections}, matrices::{Axis, Matrix2x2, Matrix3x3, Matrix4x4}, operators::{Dot, Magnitude, Normalize}, rays::Ray, tuple::{Color, Point, TFTuple, Tuple, Vector}}, objects::{Object, lights::PointLight, materials::{Material, lighting}, spheres::Sphere}};
     use std::{f32::consts::PI, ops::{Add, Div, Mul, Sub}};
     use crate::tests::Object::SphereObject;
 
@@ -575,7 +575,7 @@ mod tests {
     #[test]
     fn ray_intersect_sphere() {
         let r = Ray::new(Point::new(0.,0.,-5.), Vector::new(0., 0., 1.));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let intersection_s = s.intersect(r);
         assert_eq!(intersection_s.len(), 2);
         assert_eq!(intersection_s[0].t, 4.0);
@@ -584,7 +584,7 @@ mod tests {
     #[test]
     fn ray_tangent_to_sphere() {
         let r = Ray::new(Point::new(0.,1., -5.), Vector::new(0., 0., 1.));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let intersection_s = s.intersect(r);
         assert_eq!(intersection_s.len(), 2);
         assert_eq!(intersection_s[0].t, 5.0);
@@ -593,7 +593,7 @@ mod tests {
     #[test]
     fn ray_miss_sphere() {
         let r = Ray::new(Point::new(0.,2., -5.), Vector::new(0., 0., 1.));
-        let s = Sphere::new();
+        let s = Sphere::default();
 
         let intersection_s = s.intersect(r);
         assert_eq!(intersection_s.len(), 0);
@@ -601,7 +601,7 @@ mod tests {
     #[test]
     fn ray_inside_sphere() {
         let r = Ray::new(Point::new(0.,0., 0.), Vector::new(0., 0., 1.));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let intersection_s = s.intersect(r);
         assert_eq!(intersection_s.len(), 2);
         assert_eq!(intersection_s[0].t, -1.0);
@@ -610,7 +610,7 @@ mod tests {
     #[test]
     fn ray_infront_of_sphere() {
         let r = Ray::new(Point::new(0.,0.,5.), Vector::new(0., 0., 1.));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let intersection_s = s.intersect(r);
         assert_eq!(intersection_s.len(), 2);
         assert_eq!(intersection_s[0].t, -6.0);
@@ -618,14 +618,14 @@ mod tests {
     }
     #[test]
     fn ray_intersect_t_and_object() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i = Intersection::new(3.5, SphereObject(s));
         assert_eq!(i.t, 3.5);
         assert_eq!(i.object, SphereObject(s));
     }
     #[test]
     fn aggregating_intersection() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i1 = Intersection::new(1., SphereObject(s));
         let i2 = Intersection::new(2., SphereObject(s));
         let intersections_s = Intersections::new(vec![i1, i2]);
@@ -636,7 +636,7 @@ mod tests {
     #[test]
     fn object_set_intersection() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let intersections_s = s.intersect(r);
         assert_eq!(intersections_s.len(), 2);
         assert_eq!(intersections_s[0].object, SphereObject(s));
@@ -644,7 +644,7 @@ mod tests {
     }
     #[test]
     fn hit_when_all_pos() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i1 = Intersection::new(1., SphereObject(s));
         let i2 = Intersection::new(2., SphereObject(s));
         let intersections_s = Intersections::new(vec![i1, i2]);
@@ -653,7 +653,7 @@ mod tests {
     }
     #[test]
     fn hit_when_some_negative() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i1 = Intersection::new(-1., SphereObject(s));
         let i2 = Intersection::new(1., SphereObject(s));
         let intersections_s = Intersections::new(vec![i1, i2]);
@@ -662,7 +662,7 @@ mod tests {
     }
     #[test]
     fn all_intersects_negative() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i1 = Intersection::new(-2., SphereObject(s));
         let i2 = Intersection::new(-1., SphereObject(s));
         let intersections_s = Intersections::new(vec![i1, i2]);
@@ -671,7 +671,7 @@ mod tests {
     }
     #[test]
     fn lowest_nonnegative_intersection() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i1 = Intersection::new(5., SphereObject(s));
         let i2 = Intersection::new(7., SphereObject(s));
         let i3 = Intersection::new(-3., SphereObject(s));
@@ -698,12 +698,12 @@ mod tests {
     }
     #[test]
     fn identity_matrix_sphere() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         assert_eq!(s.transform, Matrix4x4::identity());
     }
     #[test]
     fn change_sphere_transform() {
-        let mut s = Sphere::new();
+        let mut s = Sphere::default();
         let t = Matrix4x4::translation(2., 3., 4.);
         s.transform = s.set_transform(t);
         assert_eq!(s.transform, t);
@@ -711,7 +711,7 @@ mod tests {
     #[test]
     fn intersect_scaled_sphere_with_ray() {
         let r = Ray::new(Point::new(0.,0.,-5.), Vector::new(0.,0.,1.));
-        let mut s = Sphere::new();
+        let mut s = Sphere::default();
         s.transform = s.set_transform(Matrix4x4::scaling(2., 2., 2.));
         let intersect_s = s.intersect(r);
         assert_eq!(intersect_s.len(), 2);
@@ -721,9 +721,167 @@ mod tests {
     #[test]
     fn intersect_translated_sphere_with_ray() {
         let r = Ray::new(Point::new(0.,0.,-5.), Vector::new(0.,0.,1.));
-        let mut s = Sphere::new();
+        let mut s = Sphere::default();
         s.transform = s.set_transform(Matrix4x4::translation(5.,0.,0.));
         let intersect_s = s.intersect(r);
         assert_eq!(intersect_s.len(), 0);
+    }
+    #[test]
+    fn normal_at_point_on_x() {
+        let s = Sphere::default();
+        let n = s.normal_at(Point::new(1., 0., 0.));
+        assert_eq!(n, Vector::new(1., 0., 0.));
+    }
+    #[test]
+    fn normal_at_point_on_y() {
+        let s = Sphere::default();
+        let n = s.normal_at(Point::new(0., 1., 0.));
+        assert_eq!(n, Vector::new(0., 1., 0.));
+    }
+    #[test]
+    fn normal_at_point_on_z() {
+        let s = Sphere::default();
+        let n = s.normal_at(Point::new(0., 0., 1.));
+        assert_eq!(n, Vector::new(0., 0., 1.));
+    }
+    #[test]
+    fn normal_at_point_on_nonaxial() {
+        let s = Sphere::default();
+        let n = s.normal_at(Point::new(3_f32.sqrt() / 3., 3_f32.sqrt() / 3., 3_f32.sqrt() / 3.));
+        assert_eq!(n, Vector::new(3_f32.sqrt() / 3., 3_f32.sqrt() / 3., 3_f32.sqrt() / 3.));
+    }
+    #[test]
+    fn normal_is_normalize_vector() {
+        let s = Sphere::default();
+        let n = s.normal_at(Point::new(3_f32.sqrt() / 3., 3_f32.sqrt() / 3., 3_f32.sqrt() / 3.));
+        assert_eq!(n, n.normalize());
+    }
+    #[test]
+    fn normal_on_translated_sphere() {
+        let mut s = Sphere::default();
+        s.transform = s.set_transform(Matrix4x4::translation(0., 1., 0.));
+        let n = s.normal_at(Point::new(0., 1.70711, -0.70711));
+        assert_eq!(n, Vector::new(0., 0.70711, -0.70711));
+    }
+    #[test]
+    fn normal_on_transformed_sphere() {
+        let mut s = Sphere::default();
+        let m = Matrix4x4::scaling(1., 0.5, 1.) * Matrix4x4::rotation(Axis::Z, PI / 5.);
+        s.transform = s.set_transform(m);
+        let n = s.normal_at(Point::new(0., 2_f32.sqrt() / 2., - 2_f32.sqrt() / 2.));
+        assert_eq!(n, Vector::new(0., 0.97014, -0.24254));
+    }
+    #[test]
+    fn reflect_45_degrees() {
+        let v = Vector::new(1., -1., 0.);
+        let n = Vector::new(0., 1., 0.);
+        let r = v.reflect(n);
+        assert_eq!(r, Vector::new(1., 1., 0.));
+    }
+    #[test]
+    fn reflect_slant() {
+        let v = Vector::new(0., -1., 0.);
+        let n = Vector::new(2_f32.sqrt() / 2. , 2_f32.sqrt() / 2., 0.);
+        let r = v.reflect(n);
+        assert_eq!(r, Vector::new(1., 0., 0.));
+    }
+    #[test]
+    fn default_material() {
+        let m = Material::default();
+        assert_eq!(m.color, Color::new(1., 1., 1.));
+        assert_eq!(m.ambient, 0.1);
+        assert_eq!(m.diffuse, 0.9);
+        assert_eq!(m.specular, 0.9);
+        assert_eq!(m.shininess, 200.);
+    }
+    #[test]
+    fn sphere_has_default_material() {
+        let s = Sphere::default();
+        let m = s.material;
+        assert_eq!(m, Material::default());
+    }
+    #[test]
+    fn assign_material() {
+        let mut s = Sphere::default();
+        let mut m = Material::default();
+        m.ambient = 1.;
+        s.material = m;
+        assert_eq!(s.material, m);
+    }
+    #[test]
+    fn eye_light_surface_1() {
+        let m = Material::default();
+        let position = Point::new(0.,0.,0.);
+
+        let eyev = Vector::new(0., 0., -1.);
+        let normalv = Vector::new(0., 0., -1.);
+        let light = PointLight::new
+        (
+            Point::new(0., 0., -10.), 
+            Color::new(1., 1., 1.)
+        );
+        let result = lighting(m, light, position, eyev, normalv);
+        assert_eq!(result, Color::new(1.9, 1.9, 1.9));
+    }
+    #[test]
+    fn eye_light_surface_2() {
+        let m = Material::default();
+        let position = Point::new(0., 0., 0.);
+
+        let eyev = Vector::new(0.,2_f32.sqrt() / 2. ,- 2_f32.sqrt() / 2.);
+        let normalv = Vector::new(0., 0., -1.);
+        let light = PointLight::new
+        (
+            Point::new(0., 0., -10.), 
+            Color::new(1., 1., 1.)
+        );
+        let result = lighting(m, light, position, eyev, normalv);
+        assert_eq!(result, Color::new(1.0, 1.0, 1.0));
+    }
+    #[test]
+    fn eye_light_surface_3 () {
+        let m = Material::default();
+        let position = Point::new(0., 0., 0.);
+
+        let eyev = Vector::new(0., 0., -1.);
+        let normalv = Vector::new(0., 0., -1.);
+        let light = PointLight::new
+        (
+            Point::new(0., 10., -10.), 
+            Color::new(1., 1., 1.)
+        );
+        let result = lighting(m, light, position, eyev, normalv);
+        assert_eq!(result, Color::new(0.7364, 0.7364, 0.7364));
+    }
+    #[test]
+    fn eye_light_surface_4 () {
+        let m = Material::default();
+        let position = Point::new(0., 0., 0.);
+
+        let eyev = Vector::new(0., -2_f32.sqrt() / 2. ,- 2_f32.sqrt() / 2.);
+        let normalv = Vector::new(0., 0., -1.);
+        let light = PointLight::new
+        (
+            Point::new(0., 10., -10.), 
+            Color::new(1., 1., 1.)
+        );
+        let result = lighting(m, light, position, eyev, normalv);
+        assert_eq!(result, Color::new(1.6364, 1.6364, 1.6364));
+
+    }
+    #[test]
+    fn eye_light_surface_5() {
+        let m = Material::default();
+        let position = Point::new(0.,0.,0.);
+
+        let eyev = Vector::new(0., 0., -1.);
+        let normalv = Vector::new(0., 0., -1.);
+        let light = PointLight::new
+        (
+            Point::new(0., 0., 10.), 
+            Color::new(1., 1., 1.)
+        );
+        let result = lighting(m, light, position, eyev, normalv);
+        assert_eq!(result, Color::new(0.1, 0.1, 0.1));
     }
 }

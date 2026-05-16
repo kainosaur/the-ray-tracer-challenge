@@ -6,8 +6,9 @@ pub mod rays;
 pub mod intersections;
 
 
+
 pub fn compare_equal(a: f32,b: f32) -> bool {
-    if (a-b).abs() < 0.00001 {
+    if (a-b).abs() < 0.0001 {
         return true
     } else {
         return false
