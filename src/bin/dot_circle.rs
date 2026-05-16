@@ -17,7 +17,6 @@ fn main() -> std::io::Result<()> {
     // write pixels around circle 
     let red = Color::new(1.,1.,1.);
 
-    canvas.write_pixel(drawn_point.x().round() as usize, drawn_point.y().round() as usize, red);
     for i in 0..13 {
         let current_rad = i as f32 * PI / 6.;
         let rotation = Matrix4x4::rotation(Axis::Z, current_rad);
@@ -31,7 +30,7 @@ fn main() -> std::io::Result<()> {
         );
     }
 
-    let mut file = File::create("Circle.PPM")?;
+    let mut file = File::create("Circle_Dot.PPM")?;
     file.write_all(canvas.create_file_string().as_bytes())?;
     Ok(())
 }
